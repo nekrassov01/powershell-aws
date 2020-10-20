@@ -1,6 +1,6 @@
 ﻿Function New-EC2ManagedPrefixListFromAWSPublicIpAddressRange
 {
-    [OutputType([Amazon.EC2.Model.PrefixList])]
+    [OutputType([Object])]
     [CmdletBinding()]
     Param
     (
@@ -56,11 +56,6 @@
         Set-DefaultAWSRegion -Region $Region -Scope Script
         Import-Module -Name AWS.Tools.EC2
 
-        $Tags = @{ Key="Name"; Value=$PrefixListName }
-        $NameTag = New-Object -TypeName Amazon.EC2.Model.TagSpecification
-        $NameTag.ResourceType = "prefix-list"
-        $NameTag.Tags.Add($Tags)
-
         $Ipv4Entries = @()
         $Ipv6Entries = @()
     }
@@ -87,10 +82,12 @@
                 $Ipv6Entries += $Ipv6Entry
             }
         }
-    }
-    
-    End
-    {
+
+        $Tags = @{ Key="Name"; Value=$PrefixListName }
+        $NameTag = New-Object -TypeName Amazon.EC2.Model.TagSpecification
+        $NameTag.ResourceType = "prefix-list"
+        $NameTag.Tags.Add($Tags)
+
         $PrefixListParams = @{
             AddressFamily = $IpAddressFormat
             MaxEntry = $MaxEntry
@@ -108,11 +105,17 @@
             $PrefixListParams.Add("Entry", $Ipv6Entries)
         }
 
-        New-EC2ManagedPrefixList @PrefixListParams
+        $PrefixList = New-EC2ManagedPrefixList @PrefixListParams
+    }
+    
+    End
+    {
+        return $PrefixList
     }
 }
 
 # Example
+
 $Params = @{
     Region = "ap-northeast-1"
     ServiceKey = "S3", "AMAZON_CONNECT"
@@ -123,5 +126,5 @@ $Params = @{
 
 New-EC2ManagedPrefixListFromAWSPublicIpAddressRange @Params
 
-Get-Variable | Remove-Variable -ErrorAction SilentlyContinue
+#Get-Variable | Remove-Variable -ErrorAction SilentlyContinue
 

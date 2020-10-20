@@ -1,6 +1,7 @@
 ﻿Function New-EC2SecurityGroupFromAWSPublicIpAddressRange
 {
-    [OutputType([Amazon.EC2.Model.SecurityGroup])]
+
+    [OutputType([Object])]
     [CmdletBinding()]
     Param
     (
@@ -72,6 +73,12 @@
         Set-DefaultAWSRegion -Region $Region -Scope Script
         Import-Module -Name AWS.Tools.EC2
 
+        $Ipv4Ranges = @()
+        $Ipv6Ranges = @()
+    }
+
+    Process
+    {
         $Tags = @{ Key="Name"; Value=$GroupName }
         $NameTag = New-Object -TypeName Amazon.EC2.Model.TagSpecification
         $NameTag.ResourceType = "security-group"
@@ -84,12 +91,7 @@
             TagSpecification = $NameTag
         }
         $GroupId = New-EC2SecurityGroup @SgParams
-        $Ipv4Ranges = @()
-        $Ipv6Ranges = @()
-    }
 
-    Process
-    {
         $AWSPublicIpAddresses = Get-AWSPublicIpAddressRange -ServiceKey $ServiceKey -Region $Region
 
         ForEach($AWSPublicIpAddress In $AWSPublicIpAddresses)
@@ -111,10 +113,6 @@
             }
         }
 
-    }
-    
-    End
-    {
         $IpPermission = New-Object -TypeName Amazon.EC2.Model.IpPermission
         $IpPermission.IpProtocol = $IpProtocol
         $IpPermission.FromPort = $FromPort
@@ -133,21 +131,27 @@
 
         Grant-EC2SecurityGroupIngress -GroupId $GroupId -IpPermission $IpPermission
     }
+
+    End
+    {
+        return Get-EC2SecurityGroup -GroupId $GroupId
+    }
 }
 
 # Example
+
 $IpPermissionParams = @{
     Region = "ap-northeast-1"
     ServiceKey = "S3", "CLOUD9"
     IpAddressFormat = "Ipv4"
-    GroupName = "test-secgrp-01"
-    Description = "test-secgrp-01"
+    GroupName = "test-sec-01"
+    Description = "test-sec-01"
     VpcId = "vpc-00000000000000000"
     IpProtocol = "tcp"
     FromPort = 80
     ToPort = 80
- }
+}
 
 New-EC2SecurityGroupFromAWSPublicIpAddressRange @IpPermissionParams
 
-Get-Variable | Remove-Variable -ErrorAction SilentlyContinue
+#Get-Variable | Remove-Variable -ErrorAction SilentlyContinue
