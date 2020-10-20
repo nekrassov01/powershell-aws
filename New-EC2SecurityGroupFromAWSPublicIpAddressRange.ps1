@@ -124,7 +124,8 @@
         {
             $IpPermission.Ipv6Ranges.Clear()
         }
-        ElseIf ( $IpAddressFormat -eq "Ipv6" )
+        
+        If ( $IpAddressFormat -eq "Ipv6" )
         {
             $IpPermission.Ipv4Ranges.Clear()
         }
