@@ -7,7 +7,7 @@ Import-Module -Name AWS.Tools.EC2
 
 Function New-EC2NameTag
 {
-    [OutputType([Amazon.EC2.Model.TagSpecification])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
     Param
     (
@@ -33,7 +33,7 @@ Function New-EC2NameTag
 
 Function New-EC2Filter
 {
-    [OutputType([Amazon.EC2.Model.Filter])]
+    [OutputType([System.Object])]
     [CmdletBinding()]    
     Param
     (

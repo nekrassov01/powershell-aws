@@ -7,7 +7,7 @@ Import-Module -Name AWS.Tools.EC2, AWS.Tools.IdentityManagement
 
 Function New-EC2NameTag
 {
-    [OutputType([Amazon.EC2.Model.TagSpecification])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
     Param
     (
@@ -33,7 +33,7 @@ Function New-EC2NameTag
 
 Function New-EC2Filter
 {
-    [OutputType([Amazon.EC2.Model.Filter])]
+    [OutputType([System.Object])]
     [CmdletBinding()]    
     Param
     (
@@ -58,7 +58,7 @@ Function New-EC2Filter
 
 Function New-EC2Ipv4Range
 {
-    [OutputType([Amazon.EC2.Model.IpPermission])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
     Param
     (
@@ -100,7 +100,7 @@ Function New-EC2Ipv4Range
 
 Function New-EC2BlockDevice
 {
-    [OutputType([Amazon.EC2.Model.BlockDeviceMapping])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
     Param
     (
@@ -159,43 +159,43 @@ $SgName = "sec-01"
 $SgTag = New-EC2NameTag -ResourceType "security-group" -TagValue $SgName
 $SgTagFilter = New-EC2Filter -Name "tag:Name" -Values $SgName
 
-$IpRangeObjects = @{
-    IpPermission1 = @{
-        CidrIp = "0.0.0.0/0"
-        IpProtocol = "tcp"
-        FromPort = 443
-        ToPort = 443
+$IpRangeObjects = @(
+    [PSCustomObject]@{
+        CidrIp      = "0.0.0.0/0"
+        IpProtocol  = "tcp"
+        FromPort    = 443
+        ToPort      = 443
         Description = "https: all"
     }
-    IpPermission2 = @{
-        CidrIp = "111.111.111.111/32"
-        IpProtocol = "tcp"
-        FromPort = 80
-        ToPort = 80
+    [PSCustomObject]@{
+        CidrIp      = "111.111.111.111/32"
+        IpProtocol  = "tcp"
+        FromPort    = 80
+        ToPort      = 80
         Description = "http: my-gip"
     }
-     IpPermission3 = @{
-        CidrIp = "111.111.111.111/32"
-        IpProtocol = "tcp"
-        FromPort = 22
-        ToPort = 22
+    [PSCustomObject]@{
+        CidrIp      = "111.111.111.111/32"
+        IpProtocol  = "tcp"
+        FromPort    = 22
+        ToPort      = 22
         Description = "ssh: my-gip"
     }
-    IpPermission4 = @{
-        CidrIp = "111.111.111.111/32"
-        IpProtocol = "icmp"
-        FromPort = -1
-        ToPort = -1
+    [PSCustomObject]@{
+        CidrIp      = "111.111.111.111/32"
+        IpProtocol  = "icmp"
+        FromPort    = -1
+        ToPort      = -1
         Description = "icmp: my-gip"
     }
-    IpPermission5 = @{
-        CidrIp = "10.0.0.0/16"
-        IpProtocol = "-1"
-        FromPort = 0
-        ToPort = 0
+    [PSCustomObject]@{
+        CidrIp      = "10.0.0.0/16"
+        IpProtocol  = "-1"
+        FromPort    = 0
+        ToPort      = 0
         Description = "all: vpc"
     }
-}
+)
 
 If( -not (Get-EC2SecurityGroup -Filter $SgTagFilter))
 {
@@ -208,14 +208,14 @@ If( -not (Get-EC2SecurityGroup -Filter $SgTagFilter))
     $TargetSgId = New-EC2SecurityGroup @SgParams
 
     $IpPermissions = @()
-    ForEach($IpRangeObject In $IpRangeObjects.GetEnumerator())
+    ForEach($IpRangeObject In $IpRangeObjects)
     {
         $IpPermissionParams = @{
-            CidrIp = $IpRangeObject.Value.CidrIp
-            IpProtocol = $IpRangeObject.Value.IpProtocol
-            FromPort = $IpRangeObject.Value.FromPort
-            ToPort = $IpRangeObject.Value.ToPort
-            Description = $IpRangeObject.Value.Description
+            CidrIp = $IpRangeObject.CidrIp
+            IpProtocol = $IpRangeObject.IpProtocol
+            FromPort = $IpRangeObject.FromPort
+            ToPort = $IpRangeObject.ToPort
+            Description = $IpRangeObject.Description
         }
         $IpPermissions += New-EC2Ipv4Range @IpPermissionParams
     }
