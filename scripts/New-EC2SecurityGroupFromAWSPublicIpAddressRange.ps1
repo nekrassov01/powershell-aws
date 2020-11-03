@@ -1,7 +1,7 @@
 ﻿Function New-EC2SecurityGroupFromAWSPublicIpAddressRange
 {
 
-    [OutputType([Object])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
     Param
     (

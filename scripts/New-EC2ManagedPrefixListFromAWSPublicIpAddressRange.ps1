@@ -1,6 +1,6 @@
 ﻿Function New-EC2ManagedPrefixListFromAWSPublicIpAddressRange
 {
-    [OutputType([Object])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
     Param
     (
